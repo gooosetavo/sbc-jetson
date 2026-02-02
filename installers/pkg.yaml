@@ -1,14 +1,26 @@
 name: sbc-jetson
 variant: scratch
 dependencies:
+  # All Jetson installers
   - stage: jetson_nano
+  - stage: jetson_orin_nano
+  - stage: jetson_agx_orin
   - stage: u-boot
     platform: linux/arm64
   - stage: profiles
+  # Device Tree Blobs for all supported models
   - image: "{{ .BUILD_ARG_PKGS_PREFIX }}/kernel:{{ .BUILD_ARG_PKGS }}"
     platform: linux/arm64
     from: /dtb/nvidia/tegra210-p3450-0000.dtb
     to: /rootfs/artifacts/arm64/dtb/nvidia/tegra210-p3450-0000.dtb
+  - image: "{{ .BUILD_ARG_PKGS_PREFIX }}/kernel:{{ .BUILD_ARG_PKGS }}"
+    platform: linux/arm64
+    from: /dtb/nvidia/tegra234-p3768-0000+p3767-0000.dtb
+    to: /rootfs/artifacts/arm64/dtb/nvidia/tegra234-p3768-0000+p3767-0000.dtb
+  - image: "{{ .BUILD_ARG_PKGS_PREFIX }}/kernel:{{ .BUILD_ARG_PKGS }}"
+    platform: linux/arm64
+    from: /dtb/nvidia/tegra234-p3701-0000+p3737-0000.dtb
+    to: /rootfs/artifacts/arm64/dtb/nvidia/tegra234-p3701-0000+p3737-0000.dtb
 finalize:
   - from: /rootfs
     to: /

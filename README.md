@@ -15,15 +15,21 @@ Support for this project is based on [NVIDIA embedded lifecycle](https://develop
 
 ## Supported Overlays
 
-| Overlay Name | Board       | Tegra SoC | U-Boot Config   | Description         |
-| ------------ | ----------- | --------- | --------------- | ------------------- |
-| jetson_nano  | Jetson Nano | Tegra210  | p3450-0000      | Jetson Nano overlay |
+| Overlay Name     | Board            | Tegra SoC | U-Boot Config | Description              |
+| ---------------- | ---------------- | --------- | ------------- | ------------------------ |
+| jetson_nano      | Jetson Nano      | Tegra210  | p3450-0000    | Jetson Nano overlay      |
+| jetson_orin_nano | Jetson Orin Nano | Tegra234  | p3767-0000    | Jetson Orin Nano overlay |
+| jetson_agx_orin  | AGX Orin         | Tegra234  | p3701-0000    | Jetson AGX Orin overlay  |
 
 ### Current Architecture Details
 
 - **U-Boot Version**: v2022.07 (OE4T fork)
-- **Device Tree**: `nvidia/tegra210-p3450-0000.dtb`
-- **Boot Configuration**: Serial console, security hardening, Talos dashboard disabled
+- **Multi-Model Support**: All three Jetson models supported simultaneously
+- **Device Trees**: 
+  - Nano: `nvidia/tegra210-p3450-0000.dtb`
+  - Orin Nano: `nvidia/tegra234-p3768-0000+p3767-0000.dtb` 
+  - AGX Orin: `nvidia/tegra234-p3701-0000+p3737-0000.dtb`
+- **Boot Configuration**: Serial console, security hardening, model-specific optimizations
 - **Platform**: ARM64/AArch64
 
 ## Development
@@ -31,10 +37,15 @@ Support for this project is based on [NVIDIA embedded lifecycle](https://develop
 ### Project Structure
 
 ```
-├── artifacts/u-boot/          # U-Boot build configuration
+├── artifacts/u-boot/          # U-Boot build configuration (multi-model support)
 ├── installers/                # Device-specific installers
-│   └── jetson_nano/           # Jetson Nano installer implementation
+│   ├── jetson_nano/           # Jetson Nano installer implementation
+│   ├── jetson_orin_nano/      # Jetson Orin Nano installer implementation
+│   └── jetson_agx_orin/       # Jetson AGX Orin installer implementation
 ├── profiles/                  # Talos image profiles
+│   ├── jetson_nano/           # Nano-specific profile
+│   ├── jetson_orin_nano/      # Orin Nano-specific profile
+│   └── jetson_agx_orin/       # AGX Orin-specific profile
 └── internal/                  # Shared components
 ```
 
@@ -72,10 +83,10 @@ Current U-Boot version can be updated in [`artifacts/u-boot/pkg.yaml`](artifacts
 **Version Compatibility Reference**:
 
 | Jetson Model | Tegra SoC | U-Boot Config | Minimum U-Boot Version |
-|-------------|-----------|---------------|------------------------|
-| Nano        | Tegra210  | p3450-0000    | v2021.10+             |
-| Orin Nano   | Tegra234  | p3767-0000    | v2023.01+             |
-| AGX Orin    | Tegra234  | p3701-0000    | v2023.01+             |
+| ------------ | --------- | ------------- | ---------------------- |
+| Nano         | Tegra210  | p3450-0000    | v2021.10+              |
+| Orin Nano    | Tegra234  | p3767-0000    | v2023.01+              |
+| AGX Orin     | Tegra234  | p3701-0000    | v2023.01+              |
 
 ### Building
 
@@ -88,3 +99,14 @@ Build specific installer:
 ```bash
 make jetson-nano-installer
 ```
+
+
+### Dev Dependencies
+
+- golang
+- docker
+- jq
+- graphviz (dot)
+
+recommended:
+- bash-completion
