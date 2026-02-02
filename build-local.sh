@@ -15,7 +15,7 @@ if [ "$CLEAN" = true ]; then
 fi
 
 # Create output directory
-mkdir -p _out/{u-boot,installers}
+mkdir -p _out/{u-boot,installers,dtb}
 
 echo "Building U-Boot..."
 cd _out/u-boot
@@ -55,7 +55,7 @@ else
 fi
 
 # Extract and build only if binaries don't exist
-if [ ! -f u-boot-jetson-nano.bin ]; then
+if [ ! -f u-boot-jetson-nano.bin ] || [ ! -f dtb-jetson-nano.dtb ]; then
     echo "Extracting and building U-Boot..."
     tar xf "$UBOOT_TARBALL" --strip-components=1
     
@@ -69,7 +69,13 @@ if [ ! -f u-boot-jetson-nano.bin ]; then
     make -j $(nproc) HOSTLDLIBS_mkimage="-lssl -lcrypto"
     cp u-boot.bin u-boot-jetson-nano.bin
     
-    # Orin models (if configs exist)
+    # Copy Jetson Nano DTB if it exists
+    if [ -f arch/arm/dts/tegra210-p3450-0000.dtb ]; then
+        cp arch/arm/dts/tegra210-p3450-0000.dtb dtb-jetson-nano.dtb
+        cp arch/arm/dts/tegra210-p3450-0000.dtb ../dtb/tegra210-p3450-0000.dtb
+    fi
+    
+    # Orin models (if configs exist) 
     for config in p3767-0000_defconfig p3701-0000_defconfig; do
         if [ -f configs/$config ]; then
             model=$(echo $config | cut -d'_' -f1)
@@ -78,10 +84,24 @@ if [ ! -f u-boot-jetson-nano.bin ]; then
             sed -i "s/CONFIG_TOOLS_LIBCRYPTO=y/# CONFIG_TOOLS_LIBCRYPTO is not set/" .config
             make -j $(nproc) HOSTLDLIBS_mkimage="-lssl -lcrypto"
             cp u-boot.bin u-boot-${model}.bin
+            
+            # Build DTBs for Tegra234 models
+            make dtbs
+            
+            # Copy DTB files based on model
+            if [ "$model" = "p3767-0000" ]; then
+                # Orin Nano
+                find . -name "tegra234-p3768-0000+p3767-0000.dtb" -exec cp {} dtb-jetson-orin-nano.dtb \; 2>/dev/null || true
+                find . -name "tegra234-p3768-0000+p3767-0000.dtb" -exec cp {} ../dtb/tegra234-p3768-0000+p3767-0000.dtb \; 2>/dev/null || true
+            elif [ "$model" = "p3701-0000" ]; then
+                # AGX Orin  
+                find . -name "tegra234-p3701-0000+p3737-0000.dtb" -exec cp {} dtb-jetson-agx-orin.dtb \; 2>/dev/null || true
+                find . -name "tegra234-p3701-0000+p3737-0000.dtb" -exec cp {} ../dtb/tegra234-p3701-0000+p3737-0000.dtb \; 2>/dev/null || true
+            fi
         fi
     done
 else
-    echo "U-Boot binaries already built."
+    echo "U-Boot binaries and DTBs already built."
 fi
 
 cd ../..
@@ -106,6 +126,9 @@ echo "Build complete! Artifacts are in _out/"
 echo ""
 echo "U-Boot binaries:"
 ls -la _out/u-boot/*.bin 2>/dev/null || echo "  No U-Boot binaries found"
+echo ""
+echo "Device Tree Blobs:"
+ls -la _out/dtb/*.dtb 2>/dev/null || echo "  No DTB files found"
 echo ""
 echo "Installer binaries:"
 ls -la _out/installers/ 2>/dev/null || echo "  No installer binaries found"

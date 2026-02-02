@@ -1,6 +1,6 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED, PLEASE DO NOT EDIT.
 #
-# Generated on 2026-02-02T00:49:24Z by kres dc032d7.
+# Generated on 2026-02-02T01:12:41Z by kres dc032d7.
 
 # common variables
 
@@ -33,7 +33,7 @@ BLDR := docker run --rm --user $(shell id -u):$(shell id -g) --volume $(PWD):/sr
 # docker build settings
 
 BUILD := docker buildx build
-PLATFORM ?= linux/amd64,linux/arm64
+PLATFORM ?= linux/arm64
 PROGRESS ?= auto
 PUSH ?= false
 CI_ARGS ?=
@@ -52,7 +52,7 @@ COMMON_ARGS += $(BUILD_ARGS)
 # extra variables
 
 PKGS_PREFIX ?= ghcr.io/siderolabs
-PKGS ?= v1.12.0
+PKGS ?= v1.12.0-32-g4f8efaf
 TOOLS_PREFIX ?= ghcr.io/siderolabs
 TOOLS ?= v1.12.0
 
