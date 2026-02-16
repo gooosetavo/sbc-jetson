@@ -62,7 +62,7 @@ TARGETS = sbc-jetson
 
 # help menu
 
-export define HELP_MENU_HEADER
+define HELP_MENU_HEADER
 # Getting Started
 
 To build this project, you must have the following installed:
@@ -109,6 +109,8 @@ The registry and username can be overridden by exporting REGISTRY, and USERNAME
 respectively.
 
 endef
+
+export HELP_MENU_HEADER
 
 ifneq (, $(filter $(WITH_BUILD_DEBUG), t true TRUE y yes 1))
 BUILD := BUILDX_EXPERIMENTAL=1 docker buildx debug --invoke /bin/sh --on error build
